@@ -1375,16 +1375,10 @@
 		<cfset var returnValue = '' />
 
 		<cfscript>
-			try {
-				if (listFindNoCase(".docx,.xlsx,.pptx,.docm,.xlsm,.pptm",right(arguments.filePath,5))) {
-					// parsing OpenXML files must be done using a different context class loader
-					returnValue = application.stPlugins["farcrysolrpro"].javaloader.switchThreadContextClassLoader(parseOpenXmlFile, { filePath = arguments.filePath });
-				} else {
-					// use our cached copy of tika and parse the file
-					returnValue = application.stPlugins["farcrysolrpro"].tika.parseToString(createObject("java","java.io.File").init(arguments.filePath));
-				}
+			try {			
+			returnValue = createObject("java", "org.apache.tika.Tika", 'apache-tika-app-bundle').init().parseToString(CreateObject( "java","java.io.FileInputStream" ).init( JavaCast( "string", arguments.filePath ) ));			
 			} catch (any e) {
-				WriteLog(application = true, file = 'farcrySolrPro', type = 'error', text = 'Tika failed to parse #filePath#, the error was #e.message#');
+				WriteLog(application = true, file = 'farcrySolrPro', type = 'error', text = 'Tika failed to parse #arguments.filePath#, the error was #e.message#');
 			}
 		</cfscript>
 		
