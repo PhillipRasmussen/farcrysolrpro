@@ -158,14 +158,14 @@
 				],
 				loadColdFusionClassPath = true
 			);
-			*/
+			
 			server.tikaloader = createObject("component","farcry.plugins.farcrysolrpro.packages.custom.cfsolrlib.javaloader.JavaLoader").init(
 				loadPaths = [	
 					expandPath("/farcry/plugins/farcrysolrpro/packages/custom/cfsolrlib/lib/tika-app-1.14.jar")
 				],
 				loadColdFusionClassPath = true
 			);
-			
+			*/
 			/*
 			// setup tika (note do not use this copy of tika for OpenXML files (http://en.wikipedia.org/wiki/Office_Open_XML), you must switch out the class loader, see https://github.com/markmandel/JavaLoader/wiki/Switching-the-ThreadContextClassLoader)
 			application.stPlugins["farcrysolrpro"].tika = application.stPlugins["farcrysolrpro"].javaloader.create("org.apache.tika.Tika").init();
