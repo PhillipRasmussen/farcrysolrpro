@@ -1345,29 +1345,7 @@
 	
 	<!--- helper --->
 
-	<cffunction name="parseOpenXmlFile" access="private" output="false" returntype="string">
-		<cfargument name="filePath" required="true" type="string" />
-		
-		<!--- 
-			Note this method must be run within the context of Javaloader having switched out the context class loader 
-			(see https://github.com/markmandel/JavaLoader/wiki/Switching-the-ThreadContextClassLoader) 
-			
-			call it as follows:
-				javaloader.switchThreadContextClassLoader(parseOpenXmlFile, { filePath = '/path/to/file.txt' })
-		--->
-		
-		<cfscript>	
-		// grab a new instance of tika
-		var tika = application.stPlugins["farcrysolrpro"].javaloader.create("org.apache.tika.Tika").init();
-		
-		// parse the file
-		var returnValue = tika.parseToString(createObject("java","java.io.File").init(arguments.filePath));
-		
-		// return the parsed string
-		return returnValue;
-		</cfscript>
-		
-	</cffunction>
+	
 	
 	<cffunction name="parseFile" access="public" output="false" returntype="string" hint="Parses a file using Tika and returns the file contents as a string">
 		<cfargument name="filePath" required="true" type="string" />

@@ -2,6 +2,9 @@
 
 <cfparam name="application.stPlugins.farcrysolrpro" default="#structNew()#" />
 
+
+
+
 <!--- if Solr has been configured, check that the collection and solr.xml has been set up --->
 <cfif application.fapi.getConfig(key = "solrserver", name = "bConfigured", default = 0)>
 	

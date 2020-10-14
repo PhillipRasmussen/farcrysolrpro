@@ -3,8 +3,8 @@
 	<cfset this.name = "FarCry Solr Pro" />
 	<cfset this.description = "An advanced Solr search implementation" />
 	<cfset this.lRequiredPlugins = "" />
-	<cfset this.version = "1.5.0" />
-	<cfset this.buildState = "" />
+	<cfset this.version = "1.5.1" />
+	<cfset this.buildState = "This is for Lucee 5.2 & 5.3 only." />
 	<cfset this.license = {
 		name = "Apache License 2.0",
 		link = "http://www.apache.org/licenses/LICENSE-2.0"
@@ -26,12 +26,12 @@
 			{
 				"url"="https://github.com/jeffcoughlin/farcrysolrpro/archive/1.5.0.zip",
 				"shortdesc"="w/ Solr 3.5",
-				"size"="64.9MB"
+				"size"="36.7MB"
 			},
 			{
 				"url"="http://www.n42designs.com/farcrysolrpro/farcrysolrpro-nosolr-1.5.0.zip",
 				"shortdesc"="<em>(plugin only)</em>",
-				"size"="50.3MB"
+				"size"="22.7MB"
 			}
 		],
 		"requirements"={

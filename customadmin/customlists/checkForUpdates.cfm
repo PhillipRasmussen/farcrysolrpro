@@ -62,7 +62,7 @@
 
 <cfelse>
 
-	<cfoutput><p>You are currently running version #oUpdater.getCurrentVersion()#.  This is the most recent version.</p></cfoutput>
+	<cfoutput><p>You are currently running version #oUpdater.getCurrentVersion()#.  This is the most recent version.</p><p>#oUpdater.getInstallManifest().BUILDSTATE#</p></cfoutput>
 
 </cfif>
 

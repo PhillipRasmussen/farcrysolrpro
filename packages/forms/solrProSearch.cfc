@@ -3,25 +3,25 @@
 	<cfproperty ftSeq="120" ftFieldset="General" name="operator" type="string" default="" hint="The operator used for the search" ftLabel="Search Operator" ftType="list" ftList="any:Any of these words,all:All of these words,phrase:These words as a phrase" />
 	<cfproperty ftSeq="130" ftFieldset="General" name="lContentTypes" type="string" default="" hint="The content types to be searched" ftLabel="Content Types" ftType="list" ftListData="getContentTypeList" />
 	<cfproperty ftSeq="140" ftFieldset="General" name="orderBy" type="string" default="rank" hint="The sort order of the results" ftLabel="Sort Order" ftType="list" ftList="rank:Relevance,date:Date" />
-	
+
 	<cfproperty name="bSearchPerformed" type="boolean" default="false" hint="Will be true if any search has been performed" />
-	
+
 	<cffunction name="getContentTypeList" access="public" output="false" returntype="string" hint="Returns a list used to populate the lCollections field dropdown selection">
 		<cfargument name="objectid" required="true" hint="The objectid of this object" />
-		
+
 		<cfset var oContentType = application.fapi.getContentType("solrProContentType") />
 		<cfset var qContentTypes = oContentType.getAllContentTypes() />
 		<cfset var lResult = ":All" />
-		
+
 		<cfloop query="qContentTypes">
 			<cfif qContentTypes.bEnableSearch eq 1>
 				<cfset lResult = listAppend(lResult, "#qContentTypes.contentType[qContentTypes.currentRow]#:#qContentTypes.title[qContentTypes.currentRow]#") />
 			</cfif>
 		</cfloop>
-		
+
 		<cfreturn lResult />
 	</cffunction>
-	
+
 	<cffunction name="getSearchResults" access="public" output="false" returntype="struct" hint="Returns a structure containing extensive information of the search results">
 		<cfargument name="objectid" required="true" hint="The objectid of the solrProSearch object containing the details of the search" />
 		<cfargument name="bSpellcheck" required="false" default="true" hint="enable/disable spellchecker" />
@@ -38,18 +38,18 @@
 		<cfargument name="customQueryString" required="false" type="string" hint="If you want to use a custom query string, you can pass it along here" />
 		<cfargument name="customParams" required="false" type="struct" hint="If you want to use a custom Solr parameters, you can pass them along here" />
 		<cfargument name="bLowerCaseString" required="false" type="boolean" default="true" />
-		
+
 		<!--- calculate the start row --->
 		<cfset var startRow = ((arguments.page - 1) * arguments.rows) />
 		<cfset var stResult = { bSearchPerformed = 0 } />
 		<cfset var stSearchForm = getData(objectid = arguments.objectid) />
 		<cfset var oContentType = application.fapi.getContentType("solrProContentType") />
 		<cfset var params = {} />
-		
+
 		<cfif stSearchForm.bSearchPerformed eq 1>
-			
+
 			<!--- convert search criteria into a proper solr query string (using chosen operator (any,all,phrase) and target collection, if specified) --->
-			
+
 			<!--- spellcheck --->
 			<cfif arguments.bSpellcheck is true>
 				<cfset params["spellcheck"] = true />
@@ -72,7 +72,7 @@
 			<cfelse>
 				<cfset var q = oContentType.buildQueryString(searchString = stSearchForm.q, operator = stSearchForm.operator, lContentTypes = stSearchForm.lContentTypes, bCleanString = arguments.bCleanString, bFilterBySite = arguments.bFilterBySite, bLowerCaseString = arguments.bLowerCaseString) />
 			</cfif>
-			
+
 			<!--- get the field list for the content type(s) we are searching --->
 			<!--- if doing a "PHRASE" search, remove all PHONETIC fields. to match Google and other search engine functionality --->
 			<cfset var lContentTypeIds = "" />
@@ -82,7 +82,7 @@
 			</cfloop>
 			<cfset params["qf"] = oContentType.getFieldListForTypes(
 				lContentTypes = lContentTypeIds,
-				bIncludePhonetic = (stSearchForm.operator neq "phrase"), 
+				bIncludePhonetic = (stSearchForm.operator neq "phrase"),
 				bIncludeNonString = false,
 				bUseCache = true,
 				bFlushCache = false
@@ -90,14 +90,14 @@
 
 			<!--- return the score --->
 			<cfset params["fl"] = "*,score" />
-			
+
 			<!--- apply the sort --->
 			<cfif stSearchForm.orderby eq "date">
 				<cfset params["sort"] = "datetimelastupdated desc" />
 			<cfelseif stSearchForm.orderby eq "dateAsc">
 				<cfset params["sort"] = "datetimelastupdated asc" />
 			</cfif>
-			
+
 			<!--- get highlighting --->
 			<cfif arguments.bHighlight>
 				<cfset params["hl"] = true />
@@ -107,30 +107,30 @@
 				<cfset params["hl.simple.pre"] = arguments.hlPre />
 				<cfset params["hl.simple.post"] = arguments.hlPost />
 			</cfif>
-			
+
 			<!--- Custom params override generated params --->
 			<cfif structKeyExists(arguments,"customParams")>
 				<cfset structAppend(params,arguments.customParams,"yes") />
 			</cfif>
-			
+
 			<cfset stResult = oContentType.search(q = trim(q), start = startRow, rows = arguments.rows, params = params) />
 			<cfset stResult.bSearchPerformed = 1 />
-			
+
 			<cfif arguments.bSpellcheck and structKeyExists(stResult, "spellcheck")>
 				<cfset stResult.suggestion = getSuggestion(
-					linkURL = application.fapi.getLink(objectid = request.navid), 
-					spellcheck = stResult.spellcheck, 
+					linkURL = application.fapi.getLink(objectid = request.navid),
+					spellcheck = stResult.spellcheck,
 					q = stSearchForm.q,
 					operator = stSearchForm.operator,
 					lContentTypes = stSearchForm.lContentTypes,
 					orderby = stSearchForm.orderby,
-					startWrap = '<strong>', 
-					endWrap = '</strong>'
+					startWrap = '',
+					endWrap = ''
 				) />
 			<cfelse>
 				<cfset stResult.suggestion = "" />
 			</cfif>
-			
+
 			<!--- ensure log is enabled, only log search for page 1 --->
 			<cfif arguments.bLogSearch and arguments.page eq 1>
 				<!--- log the search and result stats --->
@@ -145,31 +145,31 @@
 				} />
 				<cfset oLog.createData(stLog) />
 			</cfif>
-			
+
 		</cfif>
-		
+
 		<cfreturn stResult />
-		
+
 	</cffunction>
-	
+
 	<cffunction name="getSuggestion" access="public" output="false" returntype="string" hint="Returns suggestion text based on results from solr">
-		
+
 		<cfargument name="spellcheck" type="array" required="true" />
-		
+
 		<cfargument name="q" type="string" required="true" />
 		<cfargument name="operator" type="string" required="false" default="any" />
 		<cfargument name="lContentTypes" type="string" required="false" default="" />
 		<cfargument name="orderby" type="string" required="false" default="rank" />
-		
+
 		<cfargument name="startWrap" type="string" required="false" default="<strong>" />
 		<cfargument name="endWrap" type="string" required="false" default="</strong>" />
 		<cfargument name="linkUrl" type="string" required="false" default="#application.fapi.getLink(objectid = request.navid)#" />
-		
+
 		<!--- if we have no spell check info, just return empty string --->
 		<cfif not arrayLen(arguments.spellcheck)>
 			<cfreturn "" />
 		</cfif>
-		
+
 		<!--- build the suggestion --->
 		<cfset var suggestion = arguments.q />
 		<cfset var s = "" />
@@ -179,7 +179,7 @@
 			<!--- and one w/o --->
 			<cfset arguments.q = trim(reReplaceNoCase(arguments.q,"^#s.token# | #s.token# | #s.token#$|^#s.token#$"," " & s.suggestions[1] & " ","ALL")) />
 		</cfloop>
-		
+
 		<!--- build the url for the link --->
 		<cfset var addValues = {
 			"q" = arguments.q,
@@ -190,18 +190,18 @@
 			<cfset addValues["lContentTypes"] = arguments.lContentTypes />
 		</cfif>
 		<cfset arguments.linkUrl = application.fapi.fixUrl(
-			url = arguments.linkUrl, 
+			url = arguments.linkUrl,
 			addValues = addValues
 		) />
-		
+
 		<!--- build the HTML and return it --->
 		<cfset var str = "" />
 		<cfsavecontent variable="str">
 			<cfoutput>Did you mean <a href="#arguments.linkUrl#">#application.stPlugins.farcrysolrpro.oCustomFunctions.xmlSafeText(suggestion)#</a>?</cfoutput>
 		</cfsavecontent>
-		
+
 		<cfreturn trim(str) />
-		
+
 	</cffunction>
-	
+
 </cfcomponent>
